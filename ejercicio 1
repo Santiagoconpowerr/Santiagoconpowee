@@ -1,76 +1,76 @@
+
 import java.util.*;
 
 public class CostosMinimos {
-    static class Edge implements Comparable<Edge> {
+    static class Arista implements Comparable<Arista> {
         int u, v, w;
-        Edge(int u, int v, int w) { this.u = u; this.v = v; this.w = w; }
-        public int compareTo(Edge e) { return Integer.compare(this.w, e.w); }
+        Arista(int u, int v, int w) { this.u = u; this.v = v; this.w = w; }
+        public int compareTo(Arista a) { return Integer.compare(this.w, a.w); }
     }
 
     public static void main(String[] args) {
-        int[][] graph = generarGrafo(10, 15);
-        int primCost = prim(graph);
-        int kruskalCost = kruskal(graph);
-        System.out.println("Prim: " + primCost + ", Kruskal: " + kruskalCost);
+        int[][] grafo = generarGrafo(10, 15);
+        System.out.println("Costo Prim: " + prim(grafo));
+        System.out.println("Costo Kruskal: " + kruskal(grafo));
     }
 
-    static int[][] generarGrafo(int n, int edges) {
-        Random rand = new Random();
-        int[][] graph = new int[n][n];
-        for (int i = 0; i < edges; i++) {
-            int u = rand.nextInt(n), v = rand.nextInt(n), w = rand.nextInt(20) + 1;
-            if (u != v) graph[u][v] = graph[v][u] = w;
-        }
-        return graph;
-    }
-
-    static int prim(int[][] graph) {
-        int n = graph.length, cost = 0;
-        boolean[] visited = new boolean[n];
-        PriorityQueue<Edge> pq = new PriorityQueue<>();
-        pq.add(new Edge(0, 0, 0));
-        
-        while (!pq.isEmpty()) {
-            Edge e = pq.poll();
-            if (!visited[e.v]) {
-                visited[e.v] = true;
-                cost += e.w;
-                for (int i = 0; i < n; i++) 
-                    if (graph[e.v][i] > 0 && !visited[i]) 
-                        pq.add(new Edge(e.v, i, graph[e.v][i]));
+    static int[][] generarGrafo(int n, int minAristas) {
+        int[][] g = new int[n][n];
+        Random r = new Random();
+        int aristas = 0;
+        while (aristas < minAristas) {
+            int u = r.nextInt(n), v = r.nextInt(n), w = r.nextInt(20) + 1;
+            if (u != v && g[u][v] == 0) {
+                g[u][v] = g[v][u] = w;
+                aristas++;
             }
         }
-        return cost;
+        return g;
     }
 
-    static int kruskal(int[][] graph) {
-        int n = graph.length;
-        List<Edge> edges = new ArrayList<>();
+    static int prim(int[][] g) {
+        int n = g.length, costo = 0;
+        boolean[] vis = new boolean[n];
+        int[] min = new int[n];
+        Arrays.fill(min, Integer.MAX_VALUE);
+        min[0] = 0;
+        
+        for (int i = 0; i < n; i++) {
+            int u = -1;
+            for (int j = 0; j < n; j++)
+                if (!vis[j] && (u == -1 || min[j] < min[u])) u = j;
+            vis[u] = true;
+            costo += min[u];
+            for (int v = 0; v < n; v++)
+                if (g[u][v] > 0 && !vis[v] && g[u][v] < min[v]) min[v] = g[u][v];
+        }
+        return costo;
+    }
+
+    static int kruskal(int[][] g) {
+        int n = g.length;
+        List<Arista> aristas = new ArrayList<>();
         for (int i = 0; i < n; i++)
             for (int j = i + 1; j < n; j++)
-                if (graph[i][j] > 0) edges.add(new Edge(i, j, graph[i][j]));
-        Collections.sort(edges);
+                if (g[i][j] > 0) aristas.add(new Arista(i, j, g[i][j]));
+        Collections.sort(aristas);
         
-        int[] parent = new int[n];
-        for (int i = 0; i < n; i++) parent[i] = i;
+        int[] p = new int[n];
+        for (int i = 0; i < n; i++) p[i] = i;
         
-        int cost = 0, count = 0;
-        for (Edge e : edges) {
-            if (find(parent, e.u) != find(parent, e.v)) {
-                union(parent, e.u, e.v);
-                cost += e.w;
-                if (++count == n - 1) break;
+        int costo = 0, sel = 0;
+        for (Arista a : aristas) {
+            int ru = find(p, a.u), rv = find(p, a.v);
+            if (ru != rv) {
+                p[ru] = rv;
+                costo += a.w;
+                if (++sel == n - 1) break;
             }
         }
-        return cost;
+        return costo;
     }
 
-    static int find(int[] parent, int x) {
-        if (parent[x] != x) parent[x] = find(parent, parent[x]);
-        return parent[x];
-    }
-
-    static void union(int[] parent, int x, int y) {
-        parent[find(parent, x)] = find(parent, y);
+    static int find(int[] p, int x) {
+        return p[x] == x ? x : (p[x] = find(p, p[x]));
     }
 }
