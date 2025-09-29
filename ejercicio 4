@@ -1,0 +1,68 @@
+import java.util.*;
+
+public class CaminoMasCorto {
+    public static void main(String[] args) {
+        int[][] grafo = {
+            {0, 4, 2, 0, 0},
+            {4, 0, 1, 5, 0},
+            {2, 1, 0, 8, 10},
+            {0, 5, 8, 0, 2},
+            {0, 0, 10, 2, 0}
+        };
+        
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Origen: ");
+        int origen = sc.nextInt();
+        System.out.print("Destino: ");
+        int destino = sc.nextInt();
+        
+        encontrarCamino(grafo, origen, destino);
+    }
+    
+    static void encontrarCamino(int[][] g, int origen, int destino) {
+        int n = g.length;
+        int[] dist = new int[n];
+        int[] padre = new int[n];
+        boolean[] vis = new boolean[n];
+        
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        Arrays.fill(padre, -1);
+        dist[origen] = 0;
+        
+        for (int i = 0; i < n; i++) {
+            int u = -1;
+            for (int j = 0; j < n; j++)
+                if (!vis[j] && (u == -1 || dist[j] < dist[u])) u = j;
+            
+            if (dist[u] == Integer.MAX_VALUE) break;
+            vis[u] = true;
+            
+            for (int v = 0; v < n; v++)
+                if (g[u][v] > 0 && !vis[v] && dist[u] + g[u][v] < dist[v]) {
+                    dist[v] = dist[u] + g[u][v];
+                    padre[v] = u;
+                }
+        }
+        
+        if (dist[destino] == Integer.MAX_VALUE) {
+            System.out.println("No hay ruta posible entre los vértices");
+        } else {
+            System.out.println("Distancia: " + dist[destino]);
+            System.out.print("Camino: ");
+            imprimirCamino(padre, destino);
+        }
+    }
+    
+    static void imprimirCamino(int[] padre, int destino) {
+        List<Integer> camino = new ArrayList<>();
+        for (int v = destino; v != -1; v = padre[v])
+            camino.add(v);
+        Collections.reverse(camino);
+        
+        for (int i = 0; i < camino.size(); i++) {
+            System.out.print(camino.get(i));
+            if (i < camino.size() - 1) System.out.print(" → ");
+        }
+        System.out.println();
+    }
+}
