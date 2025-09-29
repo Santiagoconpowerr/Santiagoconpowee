@@ -1,0 +1,62 @@
+import java.util.*;
+
+public class DijkstraCamino {
+    public static void main(String[] args) {
+        int[][] grafo = {
+            {0, 4, 2, 0, 0},
+            {4, 0, 1, 5, 0},
+            {2, 1, 0, 8, 10},
+            {0, 5, 8, 0, 2},
+            {0, 0, 10, 2, 0}
+        };
+        
+        String[] vertices = {"A", "B", "C", "D", "E"};
+        dijkstra(grafo, vertices, 0);
+    }
+    
+    static void dijkstra(int[][] g, String[] vertices, int inicio) {
+        int n = g.length;
+        int[] dist = new int[n];
+        int[] parent = new int[n];
+        boolean[] visited = new boolean[n];
+        
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        Arrays.fill(parent, -1);
+        dist[inicio] = 0;
+        
+        for (int i = 0; i < n; i++) {
+            int u = -1;
+            for (int j = 0; j < n; j++)
+                if (!visited[j] && (u == -1 || dist[j] < dist[u])) u = j;
+            
+            if (dist[u] == Integer.MAX_VALUE) break;
+            visited[u] = true;
+            
+            for (int v = 0; v < n; v++)
+                if (g[u][v] > 0 && !visited[v] && dist[u] + g[u][v] < dist[v]) {
+                    dist[v] = dist[u] + g[u][v];
+                    parent[v] = u;
+                }
+        }
+ 
+        for (int i = 0; i < n; i++) {
+            if (dist[i] != Integer.MAX_VALUE) {
+                System.out.print(vertices[inicio] + " → " + vertices[i] + " (costo " + dist[i] + "): ");
+                imprimirCamino(parent, vertices, i);
+                System.out.println();
+            }
+        }
+    }
+    
+    static void imprimirCamino(int[] parent, String[] vertices, int destino) {
+        List<Integer> camino = new ArrayList<>();
+        for (int v = destino; v != -1; v = parent[v])
+            camino.add(v);
+        Collections.reverse(camino);
+        
+        for (int i = 0; i < camino.size(); i++) {
+            System.out.print(vertices[camino.get(i)]);
+            if (i < camino.size() - 1) System.out.print(" → ");
+        }
+    }
+}
