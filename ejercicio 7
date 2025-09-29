@@ -1,0 +1,43 @@
+import java.util.*;
+
+public class Warshall {
+    public static void main(String[] args) {
+        boolean[][] g = {{true,true,false,false},{false,true,true,false},{false,false,true,false},{false,false,true,true}};
+        String[] v = {"A","B","C","D"};
+        warshall(g, v);
+    }
+    
+    static void warshall(boolean[][] g, String[] v) {
+        int n = g.length;
+        boolean[][] a = new boolean[n][n];
+        
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                a[i][j] = g[i][j] || i == j;
+        
+        for (int k = 0; k < n; k++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    a[i][j] = a[i][j] || (a[i][k] && a[k][j]);
+        
+        System.out.println("Matriz Alcanzabilidad:");
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) System.out.print(a[i][j] ? "1 " : "0 ");
+            System.out.println();
+        }
+        
+        System.out.println("\nComponentes Fuertemente Conexos:");
+        boolean[] vis = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            if (!vis[i]) {
+                List<String> comp = new ArrayList<>();
+                for (int j = 0; j < n; j++)
+                    if (a[i][j] && a[j][i] && !vis[j]) {
+                        comp.add(v[j]);
+                        vis[j] = true;
+                    }
+                if (!comp.isEmpty()) System.out.println(comp);
+            }
+        }
+    }
+}
