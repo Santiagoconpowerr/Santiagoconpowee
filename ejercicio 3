@@ -1,0 +1,61 @@
+import java.util.*;
+
+public class KruskalCiclos {
+    static class Arista implements Comparable<Arista> {
+        int u, v, w;
+        Arista(int u, int v, int w) { this.u = u; this.v = v; this.w = w; }
+        public int compareTo(Arista a) { return Integer.compare(this.w, a.w); }
+    }
+
+    public static void main(String[] args) {
+        int[][] grafo = {
+            {0, 2, 0, 6, 0},
+            {2, 0, 3, 8, 5},
+            {0, 3, 0, 0, 7},
+            {6, 8, 0, 0, 9},
+            {0, 5, 7, 9, 0}
+        };
+        
+        kruskal(grafo);
+    }
+    
+    static void kruskal(int[][] g) {
+        int n = g.length;
+        List<Arista> aristas = new ArrayList<>();
+        
+    
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++)
+                if (g[i][j] > 0) aristas.add(new Arista(i, j, g[i][j]));
+        
+        Collections.sort(aristas);
+        
+        int[] padre = new int[n];
+        for (int i = 0; i < n; i++) padre[i] = i;
+        
+        int ciclosEvitados = 0;
+        int costo = 0;
+        
+        System.out.println("Aristas del MST:");
+        for (Arista a : aristas) {
+            int ru = find(padre, a.u);
+            int rv = find(padre, a.v);
+            
+            if (ru != rv) {
+                padre[ru] = rv;
+                System.out.println(a.u + " - " + a.v + " : " + a.w);
+                costo += a.w;
+            } else {
+                ciclosEvitados++; 
+            }
+        }
+        
+        System.out.println("Costo total: " + costo);
+        System.out.println("Ciclos evitados: " + ciclosEvitados);
+    }
+    
+    static int find(int[] padre, int x) {
+        if (padre[x] != x) padre[x] = find(padre, padre[x]);
+        return padre[x];
+    }
+}
